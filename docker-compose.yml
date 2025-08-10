@@ -1,0 +1,58 @@
+services:
+  mongo:
+    image: mongo:7
+    container_name: mongo
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: root
+      MONGO_INITDB_DATABASE: game_db
+    volumes:
+      - mongo-data:/data/db
+      - ./mongo-init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "mongosh",
+          "--username",
+          "root",
+          "--password",
+          "root",
+          "--eval",
+          "db.adminCommand('ping')",
+        ]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  campaign_service:
+    build: ./campaign_service
+    container_name: campaign_service
+    environment:
+      MONGO_URI: "mongodb://root:root@mongo:27017/"
+      MONGO_DB_NAME: "game_db"
+    depends_on:
+      mongo:
+        condition: service_healthy
+    ports:
+      - "8001:8001"
+
+  matcher_service:
+    build: ./matcher_service
+    container_name: matcher_service
+    environment:
+      MONGO_URI: "mongodb://root:root@mongo:27017/"
+      MONGO_DB_NAME: "game_db"
+      CAMPAIGNS_SERVICE_URL: "http://campaign_service:8001"
+    depends_on:
+      mongo:
+        condition: service_healthy
+      campaign_service:
+        condition: service_started
+    ports:
+      - "8000:8000"
+
+volumes:
+  mongo-data:

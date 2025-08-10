@@ -10,7 +10,7 @@ from app.models.campaign import Campaign
 from app.repositories.player_repository import PlayerRepository
 
 
-CAMPAIGNS_API_URL = os.getenv("CAMPAIGNS_API_URL", "http://localhost:8001/campaigns")
+CAMPAIGNS_SERVICE_URL = os.getenv("CAMPAIGNS_SERVICE_URL", "http://campaign_service:8001")
 
 
 class MatcherService:
@@ -26,8 +26,10 @@ class MatcherService:
         5) Return updated player
         """
         player = await self.repo.get_by_id(player_id)
+        
         if not player:
             return None
+        
 
         campaigns = await self._fetch_campaigns()
         now_utc = self._parse_datetime(now) or datetime.now(timezone.utc)
@@ -48,11 +50,11 @@ class MatcherService:
     # -------------------- Campaigns API --------------------
     async def _fetch_campaigns(self) -> List[Campaign]:
         try:
-            async with httpx.AsyncClient(timeout=3.0) as client:
-                resp = await client.get(CAMPAIGNS_API_URL)
-                resp.raise_for_status()
-                data = resp.json()
-                return [Campaign(**item) for item in data] if isinstance(data, list) else []
+            async with httpx.AsyncClient() as client:
+                r = await client.get(f"{CAMPAIGNS_SERVICE_URL}/campaigns", timeout=10)
+                r.raise_for_status()
+                campaigns_data = r.json()
+                return [Campaign(**item) for item in campaigns_data] if isinstance(campaigns_data, list) else []
         except Exception:
             return []
 
