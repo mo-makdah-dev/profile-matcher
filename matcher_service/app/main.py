@@ -1,8 +1,5 @@
 from fastapi import FastAPI
+from app.routers.matcher_controller import router as matcher_router
 
 app = FastAPI(title="Profile Matcher Service")
-
-@app.get("/get_client_config/{player_id}")
-async def get_client_config(player_id: str):
-    # Temporary stub so we can see the server working
-    return {"player_id": player_id, "active_campaigns": []}
+app.include_router(matcher_router)

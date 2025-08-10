@@ -1,8 +1,5 @@
 from fastapi import FastAPI
+from app.routers.campaign_controller import router as campaigns_router
 
 app = FastAPI(title="Campaigns Service")
-
-@app.get("/campaigns")
-async def list_campaigns():
-    # Temporary stub so we can see the server working
-    return []
+app.include_router(campaigns_router)
