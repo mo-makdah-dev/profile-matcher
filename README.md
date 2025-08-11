@@ -87,16 +87,6 @@ curl "http://localhost:8000/get_client_config/97983be2-98b7-11e7-90cf-082e5f28d8
 
 ## Development
 
-### Local Development Setup
-```bash
-# Install dependencies for each service
-cd campaign_service && pip install -r requirements.txt
-cd ../matcher_service && pip install -r requirements.txt
-
-# Run MongoDB separately
-docker run -d -p 27017:27017 -e MONGO_INITDB_ROOT_USERNAME=root -e MONGO_INITDB_ROOT_PASSWORD=root mongo
-```
-
 ### Database Management
 
 **Reset database with seed data:**
